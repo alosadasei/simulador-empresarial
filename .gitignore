@@ -8,10 +8,7 @@ __pycache__/
 
 # Datos generados/vivos en la VM — Git solo gestiona código,
 # no la base vectorial ni las bases de datos en producción
-data/vector_store/
-data/knowledge/
-data/logs/
-data/usuarios.db
+data/
 
 # Documentos originales (PDFs) — pesan mucho y ya están en la VM
 documents/
