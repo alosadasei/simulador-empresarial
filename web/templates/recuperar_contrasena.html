@@ -1,0 +1,121 @@
+{# Solicitud de recuperación de contraseña (envía un código por correo). #}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Recuperar contraseña</title>
+    <!-- In head -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='styles.css') }}"
+    >
+
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+</head>
+
+<body>
+    {# Contenido principal #}
+    <main class="contenedor contenedor-login">
+
+        <section class="tarjeta-login">
+
+            <a
+                class="enlace-volver"
+                href="{{ url_login }}"
+            >
+                ← Volver al acceso
+            </a>
+
+            <p class="etiqueta">
+                Recuperar contraseña
+            </p>
+
+            <h1>¿Has olvidado tu contraseña?</h1>
+
+            <p class="descripcion-login">
+                Introduce el correo de tu cuenta y te enviaremos un
+                código para establecer una contraseña nueva.
+            </p>
+
+            {# Mensajes flash (éxito / error) #}
+
+            {% with mensajes = get_flashed_messages(with_categories=true) %}
+
+                {% if mensajes %}
+
+                    <section class="mensajes">
+
+                        {% for categoria, mensaje in mensajes %}
+
+                            <p class="mensaje mensaje-{{ categoria }}">
+                                {{ mensaje }}
+                            </p>
+
+                        {% endfor %}
+
+                    </section>
+
+                {% endif %}
+
+            {% endwith %}
+
+            <form
+                class="formulario-login"
+                action="{{ url_for('auth.recuperar_contrasena') }}"
+                method="POST"
+            >
+
+                <input type="hidden" name="origen" value="{{ origen }}">
+
+                <div class="grupo-formulario">
+
+                    <label for="email">
+                        Correo electrónico
+                    </label>
+
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        autocomplete="email"
+                        autofocus
+                        required
+                    >
+
+                </div>
+
+                <button
+                    class="boton boton-principal boton-login"
+                    type="submit"
+                >
+                    Enviar código
+                </button>
+
+            </form>
+
+        </section>
+
+    </main>
+
+    {# Pie de página #}
+
+    <footer class="pie-app">
+        <p class="pie-app-texto">&copy; 2026 Simulador Empresarial</p>
+    </footer>
+</body>
+</html>

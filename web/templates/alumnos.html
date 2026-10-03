@@ -1,0 +1,206 @@
+{# Listado del alumnado registrado (panel del profesorado). #}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Alumnado</title>
+    <!-- In head -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='styles.css') }}"
+    >
+
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+</head>
+
+<body>
+    {# Contenido principal #}
+    <main class="contenedor">
+
+        <div class="cabecera-gestion">
+            <h1>Alumnado</h1>
+
+            <div class="acciones-cabecera">
+
+                <a class="boton boton-principal enlace-boton" href="{{ url_for('profesor.registrar_alumno') }}">
+                    Registrar alumno
+                </a>
+
+                <a class="boton boton-eliminar enlace-boton" href="{{ url_for('auth.logout') }}">
+                    Cerrar sesión
+                </a>
+
+            </div>
+        </div>
+
+        <p class="introduccion">
+            <a href="{{ url_for('profesor.gestionar_documentos') }}">
+                ← Volver a gestión de documentos
+            </a>
+        </p>
+
+        {# Mensajes flash (éxito / error) #}
+
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+
+            {% if mensajes %}
+
+                <section class="mensajes">
+
+                    {% for categoria, mensaje in mensajes %}
+
+                        <p class="mensaje mensaje-{{ categoria }}">
+                            {{ mensaje }}
+                        </p>
+
+                    {% endfor %}
+
+                </section>
+
+            {% endif %}
+
+        {% endwith %}
+
+        {% if alumnos %}
+
+            <section class="listado-documentos">
+
+                <div class="tabla-scroll">
+
+                    <table class="tabla-alumnos">
+
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th>DNI/NIE/Pasaporte</th>
+                                <th>Estado</th>
+                                <th>Conversaciones</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for entrada in alumnos %}
+
+                                <tr class="{% if not entrada.usuario.activo %}fila-inactiva{% endif %}">
+
+                                    <td data-etiqueta="Nombre">
+                                        {{ entrada.usuario.nombre }}
+                                        <span class="texto-secundario">
+                                            {{ entrada.usuario.nombre_usuario }}
+                                        </span>
+                                    </td>
+
+                                    <td data-etiqueta="Correo">
+                                        {{ entrada.usuario.email }}
+                                    </td>
+
+                                    <td data-etiqueta="DNI/NIE/Pasaporte">
+                                        {{ entrada.usuario.dni }}
+                                    </td>
+
+                                    <td data-etiqueta="Estado">
+                                        {% if entrada.usuario.activo %}
+                                            <span class="etiqueta-estado etiqueta-activo">Alta</span>
+                                        {% else %}
+                                            <span class="etiqueta-estado etiqueta-inactivo">Baja</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td data-etiqueta="Conversaciones">
+                                        <a
+                                            class="boton boton-secundario enlace-boton"
+                                            href="{{ url_for(
+                                                'profesor.conversaciones_alumno',
+                                                dni=entrada.usuario.dni
+                                            ) }}"
+                                        >
+                                            Ver ({{ entrada.numero_conversaciones }})
+                                        </a>
+                                    </td>
+
+                                    <td data-etiqueta="Acciones" class="celda-acciones">
+
+                                        <form
+                                            method="POST"
+                                            action="{{ url_for(
+                                                'profesor.cambiar_estado_alumno',
+                                                dni=entrada.usuario.dni
+                                            ) }}"
+                                        >
+                                            <button
+                                                type="submit"
+                                                class="boton boton-secundario"
+                                            >
+                                                {% if entrada.usuario.activo %}
+                                                    Dar de baja
+                                                {% else %}
+                                                    Dar de alta
+                                                {% endif %}
+                                            </button>
+                                        </form>
+
+                                        <form
+                                            method="POST"
+                                            action="{{ url_for(
+                                                'profesor.eliminar_alumno',
+                                                dni=entrada.usuario.dni
+                                            ) }}"
+                                            onsubmit="return confirm('¿Eliminar a {{ entrada.usuario.nombre }} y todas sus conversaciones guardadas? Esta acción no se puede deshacer.');"
+                                        >
+                                            <button
+                                                type="submit"
+                                                class="boton boton-eliminar"
+                                            >
+                                                Eliminar
+                                            </button>
+                                        </form>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        {% else %}
+
+            <section class="sin-documentos">
+                <p>Todavía no hay ninguna cuenta de alumnado registrada.</p>
+            </section>
+
+        {% endif %}
+
+    </main>
+
+    {# Pie de página #}
+
+    <footer class="pie-app">
+        <p class="pie-app-texto">&copy; 2026 Simulador Empresarial</p>
+    </footer>
+</body>
+</html>

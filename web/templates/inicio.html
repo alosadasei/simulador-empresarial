@@ -1,0 +1,84 @@
+{# Pantalla de inicio tras iniciar sesión. #}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Asistente IA para FP</title>
+    <!-- In head -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='styles.css') }}"
+    >
+
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+</head>
+
+<body>
+    {# Contenido principal #}
+    <main class="contenedor contenedor-inicio">
+
+        <section class="cabecera-inicio">
+
+            <p class="etiqueta">
+                Asistente educativo
+            </p>
+
+            <h1>Asistente IA para Formación Profesional</h1>
+
+            <p class="descripcion-inicio">
+                Consulta dudas sobre metodologías educativas y recibe
+                respuestas basadas en la documentación disponible.
+            </p>
+
+        </section>
+
+        <section class="opciones-inicio">
+
+            <article class="tarjeta-acceso">
+
+                <h2>Consultar al asistente</h2>
+
+                <p>
+                    Haz preguntas sobre las metodologías y materiales
+                    disponibles en la base de conocimiento.
+                </p>
+
+                <a
+                    class="boton boton-principal enlace-boton"
+                    href="{{ url_for('public.chat') }}"
+                >
+                    Abrir chatbot
+                </a>
+
+            </article>
+
+        </section>
+
+        <a href="{{ url_for('auth.logout') }}" class="enlace-volver-chat">
+            Cerrar sesión
+        </a>
+
+    </main>
+
+    {# Pie de página #}
+
+    <footer class="pie-app">
+        <p class="pie-app-texto">&copy; 2026 Simulador Empresarial</p>
+    </footer>
+</body>
+</html>

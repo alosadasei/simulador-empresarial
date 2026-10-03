@@ -1,0 +1,220 @@
+{# Registro de nuevos alumnos. #}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Crear una cuenta</title>
+    <!-- In head -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='styles.css') }}"
+    >
+
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+</head>
+
+<body>
+    {# Contenido principal #}
+    <main class="contenedor contenedor-login">
+
+        <section class="tarjeta-login">
+
+            <p class="etiqueta">
+                Acceso
+            </p>
+
+            <h1>Crear una cuenta</h1>
+
+            <p class="descripcion-login">
+                Las cuentas creadas desde aquí tienen acceso a la parte
+                pública de la aplicación.
+            </p>
+
+            {# Mensajes flash (éxito / error) #}
+
+            {% with mensajes = get_flashed_messages(with_categories=true) %}
+
+                {% if mensajes %}
+
+                    <section class="mensajes">
+
+                        {% for categoria, mensaje in mensajes %}
+
+                            <p class="mensaje mensaje-{{ categoria }}">
+                                {{ mensaje }}
+                            </p>
+
+                        {% endfor %}
+
+                    </section>
+
+                {% endif %}
+
+            {% endwith %}
+
+            <form
+                class="formulario-login"
+                action="{{ url_for('auth.registro') }}"
+                method="POST"
+            >
+
+                <div class="grupo-formulario">
+
+                    <label for="nombre_usuario">
+                        Nombre de usuario
+                    </label>
+
+                    <input
+                        id="nombre_usuario"
+                        name="nombre_usuario"
+                        type="text"
+                        autocomplete="username"
+                        value="{{ campos.nombre_usuario }}"
+                        required
+                    >
+
+                </div>
+
+                <div class="grupo-formulario">
+
+                    <label for="nombre">
+                        Nombre completo
+                    </label>
+
+                    <input
+                        id="nombre"
+                        name="nombre"
+                        type="text"
+                        autocomplete="name"
+                        value="{{ campos.nombre }}"
+                        required
+                    >
+
+                </div>
+
+                <div class="grupo-formulario">
+
+                    <label for="fecha_nacimiento">
+                        Fecha de nacimiento
+                    </label>
+
+                    <input
+                        id="fecha_nacimiento"
+                        name="fecha_nacimiento"
+                        type="date"
+                        value="{{ campos.fecha_nacimiento }}"
+                        required
+                    >
+
+                </div>
+
+                <div class="grupo-formulario">
+
+                    <label for="email">
+                        Correo electrónico
+                    </label>
+
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        autocomplete="email"
+                        value="{{ campos.email }}"
+                        required
+                    >
+
+                </div>
+
+                <div class="grupo-formulario">
+
+                    <label for="dni">
+                        DNI / NIE / Pasaporte
+                    </label>
+
+                    <input
+                        id="dni"
+                        name="dni"
+                        type="text"
+                        inputmode="text"
+                        maxlength="12"
+                        placeholder="12345678Z / X1234567L / AB123456"
+                        value="{{ campos.dni }}"
+                        required
+                    >
+
+                </div>
+
+                <div class="grupo-formulario">
+
+                    <label for="contrasena">
+                        Contraseña
+                    </label>
+
+                    <input
+                        id="contrasena"
+                        name="contrasena"
+                        type="password"
+                        autocomplete="new-password"
+                        minlength="8"
+                        required
+                    >
+
+                </div>
+
+                <div class="grupo-formulario">
+
+                    <label for="confirmacion">
+                        Repite la contraseña
+                    </label>
+
+                    <input
+                        id="confirmacion"
+                        name="confirmacion"
+                        type="password"
+                        autocomplete="new-password"
+                        minlength="8"
+                        required
+                    >
+
+                </div>
+
+                <button
+                    class="boton boton-principal boton-login"
+                    type="submit"
+                >
+                    Crear cuenta
+                </button>
+
+            </form>
+
+            <p class="descripcion-login">
+                ¿Ya tienes cuenta?
+                <a href="{{ url_for('auth.login') }}">Iniciar sesión</a>
+            </p>
+
+        </section>
+
+    </main>
+
+    {# Pie de página #}
+
+    <footer class="pie-app">
+        <p class="pie-app-texto">&copy; 2026 Simulador Empresarial</p>
+    </footer>
+</body>
+</html>

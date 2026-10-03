@@ -1,0 +1,108 @@
+{# Detalle de una conversación de un alumno (vista del profesorado). #}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+<!-- deprueba -->
+    <title>{{ conversacion.titulo }} — {{ alumno.nombre }}</title>
+    <!-- In head -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='styles.css') }}"
+    >
+
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+</head>
+
+<body class="pagina-chat">
+    {# Contenido principal #}
+    <main class="contenedor">
+
+        <div class="cabecera-gestion">
+            <h1>{{ conversacion.titulo }}</h1>
+
+            <a class="boton boton-eliminar enlace-boton" href="{{ url_for('auth.logout') }}">
+                Cerrar sesión
+            </a>
+        </div>
+
+        <p class="introduccion">
+            <a href="{{ url_for('profesor.conversaciones_alumno', dni=alumno.dni) }}">
+                ← Volver a las conversaciones de {{ alumno.nombre }}
+            </a>
+        </p>
+
+        <p class="nombre-carpeta">
+            {{ mostrar_nombre_metodologia(conversacion.metodologia) if conversacion.metodologia else "Sin metodología" }}
+            · Modo solo lectura
+        </p>
+
+        <div class="zona-chat">
+
+            <section class="panel-chat">
+
+                <div class="ventana-chat">
+
+                    {% for mensaje in mensajes %}
+
+                        {% if mensaje.rol == "user" %}
+
+                            <div class="fila-mensaje fila-usuario">
+
+                                <div class="identificador-mensaje">
+                                    {{ alumno.nombre }}
+                                </div>
+
+                                <div class="mensaje-chat mensaje-usuario">
+                                    {{ mensaje.contenido }}
+                                </div>
+
+                            </div>
+
+                        {% elif mensaje.rol == "bot" %}
+
+                            <div class="fila-mensaje fila-asistente">
+
+                                <div class="identificador-mensaje">
+                                    Asistente
+                                </div>
+
+                                <div class="mensaje-chat mensaje-bot">
+                                    {{ mensaje.contenido | replace('**', '') }}
+                                </div>
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+    {# Pie de página #}
+
+    <footer class="pie-app">
+        <p class="pie-app-texto">&copy; 2026 Simulador Empresarial</p>
+    </footer>
+</body>
+</html>

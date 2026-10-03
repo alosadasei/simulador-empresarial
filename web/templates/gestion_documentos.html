@@ -1,0 +1,310 @@
+{# Gestión de documentos y metodología activa (panel del profesorado). #}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Gestión de documentos</title>
+    <!-- In head -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='styles.css') }}"
+    >
+
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+</head>
+
+<body>
+    {# Contenido principal #}
+    <main class="contenedor">
+
+        <div class="cabecera-gestion">
+            <h1>Gestión de documentos</h1>
+
+            <a class="boton boton-secundario enlace-boton" href="{{ url_for('profesor.listar_alumnos') }}">
+                Alumnado
+            </a>
+
+            <a class="boton boton-eliminar enlace-boton" href="{{ url_for('auth.logout') }}">
+                Cerrar sesión
+            </a>
+        </div>
+       
+        <div class="metodologia-activa">
+            <h2>Metodología activa para el alumnado</h2>
+        
+            <p>
+                Actualmente activa:
+                <strong>
+                    {{ mostrar_nombre_metodologia(metodologia_activa) }}
+                </strong>
+            </p>
+        
+            <form method="POST" action="{{ url_for('profesor.cambiar_metodologia_activa') }}">
+                <label for="metodologia-activa">
+                    Seleccionar metodología:
+                </label>
+        
+                <select id="metodologia-activa" name="metodologia">
+                    {% for metodologia in metodologias %}
+                    <option value="{{ metodologia }}" {% if metodologia==metodologia_activa %} selected {% endif %}>
+                        {{ mostrar_nombre_metodologia(metodologia) }}
+                    </option>
+                    {% endfor %}
+                </select>
+        
+                <button type="submit">
+                    Activar metodología
+                </button>
+            </form>
+        </div>
+
+        <p class="introduccion">
+            Selecciona una metodología para gestionar sus documentos PDF.
+        </p>
+
+        {# Mensajes flash (éxito / error) #}
+
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+
+            {% if mensajes %}
+
+                <section class="mensajes">
+
+                    {% for categoria, mensaje in mensajes %}
+
+                        <p class="mensaje mensaje-{{ categoria }}">
+                            {{ mensaje }}
+                        </p>
+
+                    {% endfor %}
+
+                </section>
+
+            {% endif %}
+
+        {% endwith %}
+
+        {% if metodologias %}
+
+            <section class="metodologias">
+
+                {% for metodologia in metodologias %}
+
+                    <a
+                        class="
+                            tarjeta-metodologia
+                            {% if metodologia_seleccionada == metodologia %}
+                                tarjeta-seleccionada
+                            {% endif %}
+                        "
+                        href="{{ url_for(
+                            'profesor.gestionar_documentos',
+                            metodologia=metodologia
+                        ) }}"
+                    >
+                        <h2>
+                            {{ mostrar_nombre_metodologia(metodologia) }}
+                        </h2>
+
+                        <p>Gestionar documentos</p>
+                    </a>
+
+                {% endfor %}
+
+            </section>
+
+        {% else %}
+
+            <section class="sin-metodologias">
+                <p>
+                    No hay metodologías disponibles dentro de la carpeta
+                    documents.
+                </p>
+            </section>
+
+        {% endif %}
+
+        {% if metodologia_seleccionada %}
+
+            <section class="panel-documentos">
+
+                <h2>
+                    {{ mostrar_nombre_metodologia(
+                        metodologia_seleccionada
+                    ) }}
+                </h2>
+
+                <p class="nombre-carpeta">
+                    Carpeta: {{ metodologia_seleccionada }}
+                </p>
+
+                <section class="seccion-subida">
+
+                    <h3>Subir un nuevo PDF</h3>
+
+                    <form
+                        class="formulario-subida"
+                        action="{{ url_for('profesor.subir_documento') }}"
+                        method="POST"
+                        enctype="multipart/form-data"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="metodologia"
+                            value="{{ metodologia_seleccionada }}"
+                        >
+
+                        <input
+                            type="file"
+                            name="archivo"
+                            accept=".pdf,application/pdf"
+                            required
+                        >
+
+                        <button
+                            class="boton boton-principal"
+                            type="submit"
+                        >
+                            Subir documento
+                        </button>
+
+                    </form>
+
+                </section>
+
+                <section class="listado-documentos">
+
+                    <h3>Documentos disponibles</h3>
+
+                    {% if documentos %}
+
+                        <ul>
+
+                            {% for documento in documentos %}
+
+                                <li>
+
+                                    <div class="informacion-documento">
+
+                                        <span class="icono-pdf">
+                                            PDF
+                                        </span>
+
+                                        <span>
+                                            {{ documento }}
+                                        </span>
+
+                                    </div>
+
+                                    <form
+                                        action="{{ url_for(
+                                            'profesor.eliminar_documento'
+                                        ) }}"
+                                        method="POST"
+                                        onsubmit="
+                                            return confirm(
+                                                '¿Seguro que quieres eliminar este documento?'
+                                            );
+                                        "
+                                    >
+
+                                        <input
+                                            type="hidden"
+                                            name="metodologia"
+                                            value="{{ metodologia_seleccionada }}"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="documento"
+                                            value="{{ documento }}"
+                                        >
+
+                                        <button
+                                            class="boton boton-eliminar"
+                                            type="submit"
+                                        >
+                                            Eliminar
+                                        </button>
+
+                                    </form>
+
+                                </li>
+
+                            {% endfor %}
+
+                        </ul>
+
+                    {% else %}
+
+                        <p class="sin-documentos">
+                            No hay documentos PDF en esta metodología.
+                        </p>
+
+                    {% endif %}
+
+                </section>
+
+                <section class="seccion-vectorial">
+
+                    <h3>Base de conocimiento</h3>
+
+                    <p>
+                        Esta función se conectará más adelante con el
+                        proceso de lectura, limpieza, chunking y
+                        vectorización de los documentos.
+                    </p>
+
+                    <form
+                        action="{{ url_for(
+                            'profesor.reconstruir_base_vectorial'
+                        ) }}"
+                        method="POST"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="metodologia"
+                            value="{{ metodologia_seleccionada }}"
+                        >
+
+                        <button
+                            class="boton boton-secundario"
+                            type="submit"
+                        >
+                            Reconstruir base vectorial
+                        </button>
+
+                    </form>
+
+                </section>
+
+            </section>
+
+        {% endif %}
+
+    </main>
+
+    {# Pie de página #}
+
+    <footer class="pie-app">
+        <p class="pie-app-texto">&copy; 2026 Simulador Empresarial</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,139 @@
+{# Segundo paso del login: introducir el código recibido por correo. #}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Verificación en dos pasos</title>
+    <!-- In head -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='styles.css') }}"
+    >
+
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+</head>
+
+<body>
+    {# Contenido principal #}
+    <main class="contenedor contenedor-login">
+
+        <section class="tarjeta-login">
+
+            <a
+                class="enlace-volver"
+                href="{{ url_for('auth.cancelar_verificacion') }}"
+            >
+                ← Cancelar y volver
+            </a>
+
+            <p class="etiqueta">
+                Verificación en dos pasos
+            </p>
+
+            <h1>Introduce el código</h1>
+
+            <p class="descripcion-login">
+                Hemos enviado un código de {{ longitud_codigo }} dígitos a
+                <strong>{{ email_oculto }}</strong>.
+                Introdúcelo para completar el acceso.
+            </p>
+
+            {# Mensajes flash (éxito / error) #}
+
+            {% with mensajes = get_flashed_messages(with_categories=true) %}
+
+                {% if mensajes %}
+
+                    <section class="mensajes">
+
+                        {% for categoria, mensaje in mensajes %}
+
+                            <p class="mensaje mensaje-{{ categoria }}">
+                                {{ mensaje }}
+                            </p>
+
+                        {% endfor %}
+
+                    </section>
+
+                {% endif %}
+
+            {% endwith %}
+
+            <form
+                class="formulario-login"
+                action="{{ url_for('auth.verificar_login') }}"
+                method="POST"
+            >
+
+                <div class="grupo-formulario">
+
+                    <label for="codigo">
+                        Código de verificación
+                    </label>
+
+                    <input
+                        id="codigo"
+                        name="codigo"
+                        type="text"
+                        inputmode="numeric"
+                        pattern="[0-9]*"
+                        maxlength="{{ longitud_codigo }}"
+                        autocomplete="one-time-code"
+                        autofocus
+                        required
+                    >
+
+                </div>
+
+                <button
+                    class="boton boton-principal boton-login"
+                    type="submit"
+                >
+                    Verificar
+                </button>
+
+            </form>
+
+            <form
+                class="formulario-login"
+                action="{{ url_for('auth.reenviar_codigo') }}"
+                method="POST"
+            >
+
+                <button
+                    class="boton boton-secundario boton-login"
+                    type="submit"
+                    {% if segundos_reenvio > 0 %}disabled{% endif %}
+                >
+                    Reenviar código{% if segundos_reenvio > 0 %} ({{ segundos_reenvio }} s){% endif %}
+                </button>
+
+            </form>
+
+        </section>
+
+    </main>
+
+    {# Pie de página #}
+
+    <footer class="pie-app">
+        <p class="pie-app-texto">&copy; 2026 Simulador Empresarial</p>
+    </footer>
+</body>
+</html>

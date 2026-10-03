@@ -1,0 +1,441 @@
+{# Pantalla principal del chat: conversaciones, modos pregunta/guía y guía lateral. #}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente IA para FP</title>
+    <!-- In head -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+</head>
+
+<body class="pagina-chat">
+
+    {# Contenido principal #}
+    <main class="contenedor-chat">
+
+        <!-- CABECERA -->
+        <header class="cabecera-chat">
+
+            <div>
+                <p class="etiqueta-chat">
+                    Formación Profesional
+                </p>
+
+                <h1>Asistente IA</h1>
+            </div>
+
+            <div class="acciones-chat">
+
+                <form method="POST"
+                      action="{{ url_for('public.reiniciar_conversacion') }}"
+                      onsubmit="return confirm('¿Reiniciar la conversación actual? Se borrarán sus mensajes.');">
+                    <button type="submit" class="boton boton-secundario boton-reiniciar">
+                        Reiniciar conversación
+                    </button>
+                </form>
+
+                <button type="button" class="boton boton-secundario boton-imprimir" onclick="window.print()">
+                    Imprimir conversación
+                </button>
+
+                <a href="{{ url_for('public.inicio') }}" class="enlace-volver-chat">
+                    Volver al inicio
+                </a>
+
+                <a href="{{ url_for('auth.logout') }}" class="enlace-volver-chat">
+                    Cerrar sesión
+                </a>
+
+            </div>
+
+        </header>
+
+
+        <!-- MENSAJES FLASH -->
+        {# Mensajes flash (éxito / error) #}
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% if mensajes %}
+
+            <div class="mensajes">
+
+                {% for categoria, mensaje in mensajes %}
+
+                    <div class="mensaje mensaje-{{ categoria }}">
+                        {{ mensaje }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+        {% endwith %}
+
+
+        <!-- LISTA DE CONVERSACIONES -->
+        <nav class="lista-conversaciones" aria-label="Tus conversaciones guardadas">
+
+            <div class="conversaciones-items">
+
+                {% for conv in conversaciones %}
+
+                    <div class="chip-conversacion {% if conv.id == conversacion_actual.id %}chip-activa{% endif %}">
+
+                        <form method="POST" action="{{ url_for('public.cambiar_conversacion') }}">
+                            <input type="hidden" name="conversacion_id" value="{{ conv.id }}">
+                            <button type="submit" class="chip-seleccionar" title="{{ conv.titulo }}">
+                                {{ conv.titulo }}
+                            </button>
+                        </form>
+
+                        <form method="POST"
+                              action="{{ url_for('public.eliminar_conversacion') }}"
+                              onsubmit="return confirm('¿Eliminar esta conversación y todos sus mensajes?');">
+                            <input type="hidden" name="conversacion_id" value="{{ conv.id }}">
+                            <button type="submit" class="chip-eliminar" aria-label="Eliminar conversación">
+                                &times;
+                            </button>
+                        </form>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            <form method="POST" action="{{ url_for('public.nueva_conversacion') }}">
+                <button type="submit"
+                        class="boton boton-secundario boton-nueva-conversacion"
+                        {% if conversaciones|length >= maximo_conversaciones %}disabled{% endif %}>
+                    + Nueva conversación
+                    <span class="contador-conversaciones">
+                        {{ conversaciones|length }}/{{ maximo_conversaciones }}
+                    </span>
+                </button>
+            </form>
+
+        </nav>
+
+
+        <!-- CHAT + GUÍA -->
+        <div class="zona-chat">
+
+            <!-- CHAT PRINCIPAL -->
+            <section class="panel-chat">
+
+                <div class="ventana-chat">
+
+                    <div class="fila-mensaje fila-asistente">
+                        <div class="identificador-mensaje">
+                            Asistente
+                        </div>
+
+                        <div class="mensaje-chat mensaje-bot">
+                            Hola! Soy tu asistente IA de Simulación Empresarial.
+                            Pregunta sobre el contenido o utiliza la guía para avanzar paso a paso.
+                        </div>
+                    </div>
+
+                    {% for mensaje in conversacion %}
+
+                        {% if mensaje.rol == "user" %}
+
+                            <div class="fila-mensaje fila-usuario">
+
+                                <div class="identificador-mensaje">
+                                    Tú
+                                </div>
+
+                                <div class="mensaje-chat mensaje-usuario">
+                                    {{ mensaje.contenido }}
+                                </div>
+
+                            </div>
+
+                        {% elif mensaje.rol == "bot" %}
+
+                            <div class="fila-mensaje fila-asistente">
+
+                                <div class="identificador-mensaje">
+                                    Asistente
+                                </div>
+
+                                <div class="mensaje-chat mensaje-bot">
+                                    {{ mensaje.contenido | replace('**', '') }}
+                                </div>
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- CONTROLES -->
+                <form class="formulario-chat"
+                      action="{{ url_for('public.chat') }}"
+                      method="POST"
+                      id="formulario-chat">
+
+                    <!-- METODOLOGÍA ACTUAL -->
+                    <div class="grupo-metodologia">
+                        <span class="etiqueta-metodologia">
+                            Metodología actual
+                        </span>
+
+                        <strong class="nombre-metodologia">
+                            {{ mostrar_nombre_metodologia(metodologia_seleccionada) }}
+                        </strong>
+                    </div>
+
+
+                    <!-- MODOS -->
+                    <div class="selector-modos">
+
+                        <div class="tarjetas-modo">
+
+                            <!-- MODO PREGUNTAS -->
+                            <section class="tarjeta-modo tarjeta-preguntas">                               
+
+                                <div class="contenido-modo">
+
+                                    <div class="contenedor-icono">
+                                        <div class="icono-modo" aria-hidden="true">?</div>
+                                        
+                                        <h3>Preguntas</h3>
+                                    </div>                                   
+
+                                    <p>
+                                        Resuelve dudas sobre los contenidos
+                                        de la metodología seleccionada.
+                                    </p>
+                                </div>
+
+                                <textarea
+                                    id="pregunta"
+                                    name="pregunta"
+                                    rows="3"
+                                    maxlength="500"
+                                    placeholder="Por ejemplo: ¿Qué es Lean Startup?"
+                                    required></textarea>
+
+                                <button
+                                    class="boton boton-principal boton-enviar"
+                                    type="submit"
+                                    name="modo"
+                                    value="normal">
+                                    Hacer una pregunta
+                                </button>
+
+                            </section>
+
+
+                            <!-- MODO GUÍA -->
+                            <section class="tarjeta-modo tarjeta-guia">
+
+                                
+
+                                <div class="contenido-modo">
+
+                                    <div class="contenedor-icono">
+                                        <div class="icono-modo icono-guia" aria-hidden="true">✓</div>
+                                    
+                                        <h3>Guía paso a paso</h3>
+                                    </div>                                    
+
+                                    <p>
+                                        Consulta las fases y actividades
+                                        y marca las que hayas completado.
+                                    </p>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    class="boton boton-guiado boton-abrir-guia"
+                                    id="boton-abrir-guia">
+                                    Abrir guía
+                                </button>
+
+                            </section>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- CARGA -->
+                    <div id="estado-carga" class="estado-carga" hidden>
+                        <span class="spinner"></span>
+
+                        <span>
+                            Generando respuesta...
+                        </span>
+                    </div>
+
+
+                    <p class="ayuda-pregunta">
+                        Máximo 500 caracteres.
+                    </p>
+
+                </form>
+
+            </section>
+
+
+            <!-- GUÍA LATERAL -->
+            <aside class="panel-guia" id="panel-checklist" hidden>
+
+                <div class="cabecera-checklist">
+
+                    <div>
+                        <span class="etiqueta-checklist">
+                            TU PROCESO
+                        </span>
+
+                        <h2>Guía de trabajo</h2>
+
+                        <p>
+                            Selecciona una actividad para trabajarla
+                            con el asistente.
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="boton boton-secundario boton-cerrar-guia"
+                        id="boton-cerrar-guia"
+                        aria-label="Ocultar guía">
+                        Ocultar
+                    </button>
+
+                </div>
+
+
+                <div id="checklist" class="checklist">
+
+                    {% if pasos %}
+
+                        {% for paso in pasos %}
+
+                            <div class="elemento-guia">
+
+                                <div class="fila-paso">
+                                    <strong class="titulo-paso">
+                                        {{ paso.titulo }}
+                                    </strong>
+                                </div>
+
+                                {% if metodologia_seleccionada == "simulacion_empresarial" %}
+
+                                    {% for fase in paso.hijos %}
+
+                                        {% if fase.titulo and fase.titulo.lower().startswith("fase ") %}
+
+                                            <div class="fila-actividad">
+
+                                                <input
+                                                    type="checkbox"
+                                                    id="paso-{{ fase.id }}"
+                                                    class="checkbox-paso"
+                                                    data-paso-id="{{ fase.id }}"
+                                                    data-metodologia="{{ metodologia_seleccionada }}"
+                                                    {% if estado_guia and fase.id in estado_guia.completados %}
+                                                        checked
+                                                    {% endif %}>
+
+                                                <label for="paso-{{ fase.id }}">
+                                                    {{ fase.titulo }}
+                                                </label>
+
+                                                <button
+                                                    type="button"
+                                                    class="boton-empezar-paso"
+                                                    data-paso-id="{{ fase.id }}"
+                                                    data-metodologia="{{ metodologia_seleccionada }}">
+                                                    Empezar
+                                                </button>
+
+                                            </div>
+
+                                        {% endif %}
+
+                                    {% endfor %}
+
+                                {% elif metodologia_seleccionada == "lean_startup" %}
+
+                                    {% for actividad in actividades_por_paso[paso.id] %}
+
+                                        <div class="fila-actividad">
+
+                                            <input
+                                                type="checkbox"
+                                                id="paso-{{ actividad.id }}"
+                                                class="checkbox-paso"
+                                                data-paso-id="{{ actividad.id }}"
+                                                data-metodologia="{{ metodologia_seleccionada }}"
+                                                {% if estado_guia and actividad.id in estado_guia.completados %}
+                                                    checked
+                                                {% endif %}>
+
+                                            <label for="paso-{{ actividad.id }}">
+                                                {{ actividad.titulo }}
+                                            </label>
+
+                                            <button
+                                                type="button"
+                                                class="boton-empezar-paso"
+                                                data-paso-id="{{ actividad.id }}"
+                                                data-metodologia="{{ metodologia_seleccionada }}">
+                                                Empezar
+                                            </button>
+
+                                        </div>
+
+                                    {% endfor %}
+
+                                {% endif %}
+
+                            </div>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <p class="checklist-vacio">
+                            No hay pasos disponibles para esta metodología.
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </aside>
+
+        </div>
+    </main>
+
+    {# Pie de página #}
+
+    <footer class="pie-app">
+        <p class="pie-app-texto">&copy; 2026 Simulador Empresarial</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='chatbot.js') }}"></script>
+
+</body>
+
+</html>
